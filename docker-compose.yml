@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  gm-config-service:
+    container_name: gm-config-server-container
+    image: tobyawo/gm-config-server-service:latest
+    build: ./
+    restart: on-failure
+    ports:
+      - "9000:9000"
+networks:
+  default:
+    external:
+      name: gm-services-docker-network
+
+#Network: Make sure the network gm-services-docker-network is created and available:
+#docker network create g4m-services-docker-network
