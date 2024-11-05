@@ -1,0 +1,19 @@
+services:
+  postgresqldb:
+    container_name: gm-user-postgres-container
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=gmaccess
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+
+networks:
+  default:
+    external:
+      name: gm-services-docker-network
+

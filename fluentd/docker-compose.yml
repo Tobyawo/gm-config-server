@@ -1,0 +1,11 @@
+services:
+  fluentd:
+    image: fluentd
+    ports:
+      - "24224:24224"
+    volumes:
+      - ./fluent.conf:/fluentd/etc/fluent.conf
+      - ./logs:/fluentd/log  # Maps container logs to host directory
+    environment:
+      FLUENTD_CONF: "fluent.conf"
+

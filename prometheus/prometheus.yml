@@ -1,0 +1,11 @@
+scrape_configs:
+  - job_name: 'gm-access-service'
+    metrics_path: '/gm-access/api/actuator/prometheus'  # Full path to metrics
+    static_configs:
+      - targets: ['gm-access-container:8086']
+  
+  - job_name: 'gm-user-service'
+    metrics_path: '/gm-user/api/actuator/prometheus'  # Assuming gm-user-service uses similar custom path
+    static_configs:
+      - targets: ['gm-user-container:8087']
+

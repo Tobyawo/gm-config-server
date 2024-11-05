@@ -1,0 +1,13 @@
+services:
+  grafana-service:
+    container_name: grafana-container
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"  # Grafana UI access
+    networks:
+      - gm-services-network  # Shared network for Prometheus connectivity
+
+networks:
+  gm-services-network:
+    external: true
+    name: gm-services-docker-network

@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount Prometheus configuration
+    ports:
+      - "9090:9090"  # Prometheus UI access
+    networks:
+      - gm-services-network
+
+networks:
+  gm-services-network:
+    external: true
+    name: gm-services-docker-network

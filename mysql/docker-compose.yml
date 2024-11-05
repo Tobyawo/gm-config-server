@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  mysql-server:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" 
+      MYSQL_DATABASE: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - gm-services-docker-network
+
+networks:
+  gm-services-docker-network:
+    external:
+      name: gm-services-docker-network
+
+volumes:
+  mysql_data:
