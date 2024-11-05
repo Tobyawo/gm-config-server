@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  jenkins:
+    image: my-jenkins-with-docker
+    container_name: jenkins
+    privileged: true
+    user: root
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: 1
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    networks:
+      - jenkins
+
+  docker:
+    image: docker:dind
+    container_name: jenkins-docker
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+    networks:
+      - jenkins
+    expose:
+      - "2376"
+
+networks:
+  jenkins:
+    external:
+      name: jenkins-network
+
+volumes:
+  jenkins-data:
+  jenkins-docker-certs:
