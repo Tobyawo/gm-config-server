@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gm-config-service
+spec:
+  selector:
+    app: gm-config-service
+  ports:
+    - port: 80
+      targetPort: 9000
+  type: NodePort

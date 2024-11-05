@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gm-config-deployment
+  labels:
+    app: gm-config-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gm-config-service
+  template:
+    metadata:
+      labels:
+        app: gm-config-service
+    spec:
+      containers:
+        - name: gm-config-server
+          image: tobyawo/gm-config-server-service:latest
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/gm-config-server  # Adjust the log path as needed
+
+        - name: fluentd-config
+          image: fluentd  # Use the Fluentd image
+          ports:
+            - containerPort: 24225  # Fluentd port
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/gm-config-server  # Mount the same log directory to read logs
+            - name: fluentd-gm-config-server
+              mountPath: /fluentd/etc  # Mount ConfigMap as a directory
+          resources:
+            limits:
+              memory: "200Mi"
+              cpu: "100m"
+          command: ["fluentd", "-c", "/fluentd/etc/fluent.conf"]
+
+      volumes:
+        - name: log-volume
+          emptyDir: {}  # Use emptyDir for shared log storage
+        - name: fluentd-gm-config-server
+          configMap:
+            name: fluentd-gm-config-server  # Reference to the ConfigMap for Fluentd configuration
