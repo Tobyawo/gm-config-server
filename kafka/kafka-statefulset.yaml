@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+spec:
+  serviceName: "kafka"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: wurstmeister/kafka:latest
+          ports:
+            - containerPort: 9093
+          env:
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: INSIDE_CLUSTER://kafka:9093
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_INSIDE_CLUSTER
+              value: PLAINTEXT  # Specify the security protocol for INSIDE_CLUSTER listener
+            - name: KAFKA_LISTENERS
+              value: INSIDE_CLUSTER://0.0.0.0:9093
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: zookeeper:2181
+            - name: KAFKA_LISTENER_NAME_INSIDE_CLUSTER
+              value: INSIDE_CLUSTER
+          volumeMounts:
+            - name: kafka-storage
+              mountPath: /var/lib/kafka/data
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
