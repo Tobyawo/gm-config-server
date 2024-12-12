@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  mysql-server:
+  mysqldb:
     image: mysql:latest
     container_name: mysql-container
     environment:

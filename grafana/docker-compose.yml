@@ -1,4 +1,15 @@
+version: '3.8'
 services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount Prometheus configuration
+    ports:
+      - "9090:9090"  # Prometheus UI access
+    networks:
+      - gm-services-network
+
   grafana-service:
     container_name: grafana-container
     image: grafana/grafana:latest
