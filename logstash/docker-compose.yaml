@@ -1,0 +1,81 @@
+version: "3.7"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"  # Adjust memory as needed
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      # - "9300:9300"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gm-services-docker-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: logstash
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+#    depends_on:
+#      elasticsearch:
+#        condition: service_healthy
+    ports:
+      - "5044:5044"
+    networks:
+      - gm-services-docker-network
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - elasticsearch
+    networks:
+      - gm-services-docker-network
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.4
+    container_name: filebeat
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/log:/var/log  # Adjust path to log files
+#    depends_on:
+#      - logstash
+    networks:
+      - gm-services-docker-network
+      - default
+
+#
+networks:
+  gm-services-docker-network:
+    driver: bridge
+
+  default:
+    external:
+      name: gm-services-docker-network
+
+
+
+
+#  Logs from microservices are written to files or streamed through a service like Kafka.
+#  Logstash reads the logs, enriches them (e.g., adds timestamps, parses formats), and sends them to Elasticsearch.
+#  Elasticsearch stores the logs, making them searchable by fields like service_name, timestamp, or log_level.
+#  Grafana connects to Elasticsearch to display metrics like error counts or request rates in dashboards, providing real-time insights.

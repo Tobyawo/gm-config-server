@@ -1,0 +1,24 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.ignore_decoding_error: true
+
+processors:
+  - decode_json_fields:
+      fields: ["message"]        # Specify the field to decode if not already JSON
+      target: ""                  # Put decoded fields at the root level
+      overwrite_keys: true        # Overwrite existing fields with the decoded JSON data
+      add_error_key: true         # Add an 'error' key for failed decoding attempts
+  - drop_event:
+      when:
+        contains:
+          error.message: "json: cannot unmarshal"
+        not:
+          has_fields: [ "json" ]
+
+output.logstash:
+  hosts: ["localhost:5044"]
