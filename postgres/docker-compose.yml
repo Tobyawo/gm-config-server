@@ -17,3 +17,7 @@ networks:
     external:
       name: gm-services-docker-network
 
+
+
+#  kubectl apply -f gm-user-postgres-deployment.yml
+#  kubectl apply -f gm-user-postgres-service.yml

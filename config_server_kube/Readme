@@ -12,3 +12,8 @@ Fluentd ConfigMap:
 Configures Fluentd to tail log files in /var/log/gm-access and output them.
 The @type stdout directive outputs logs to stdout for testing. Replace with the appropriate plugin to
 send logs to your preferred backend (e.g., Elasticsearch, a central Fluentd aggregator, or other services).
+
+
+kubectl apply -f fluentd-gm-config-server.yaml
+kubectl apply -f gm-config-deployment-service.yml
+kubectl apply -f gm-config-deployment.yml

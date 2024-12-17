@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gm-api-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: gm-api.local
+      http:
+        paths:
+          - path: /gm-access/api/
+            pathType: Prefix
+            backend:
+              service:
+                name: gm-access-service
+                port:
+                  number: 8086
+          - path: /gm-user/api/
+            pathType: Prefix
+            backend:
+              service:
+                name: gm-user-service
+                port:
+                  number: 8087
+
+
+
+#  kubectl apply -f ingress-gm-api.yaml
+#  To set up NGINX Ingress Controller as an API Gateway for your Kubernetes services
+#  You can install the NGINX Ingress Controller using the Minikube addon or via Helm.
+#1. minikube addons enable ingress
+#2. helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+#  helm repo update
+#  Verify the Installation
+#  kubectl get pods -n ingress-nginx
+#  kubectl get svc -n ingress-nginx
+
+#  helm install ingress-nginx ingress-nginx/ingress-nginx --set controller.publishService.enabled=true
+
+#  The spring.cloud.gateway configuration you mentioned would no longer be needed for routing,
+#  as the NGINX Ingress Controller will handle routing.
+
+#  kubectl port-forward svc/ingress-nginx-controller -n ingress-nginx 8080:80
