@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: kafka
 spec:
-  ports:
-    - port: 9093
-      name: kafka
-  clusterIP: None
+  type: NodePort
   selector:
     app: kafka
+  ports:
+    - name: kafka
+      port: 9092
+      nodePort: 30093
+

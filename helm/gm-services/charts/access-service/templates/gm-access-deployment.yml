@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gm-access-deployment
+  labels:
+    app: gm-access-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gm-access-service
+  template:
+    metadata:
+      labels:
+        app: gm-access-service
+    spec:
+      containers:
+        # Main Application Container
+        - name: gm-access
+          image: {{ .Values.services.gmAccess.image }}
+          ports:
+            - containerPort: 8086
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/gm-access  # Path where logs are written by the application
+
+        # Fluentd Sidecar Container
+        - name: fluentd-sidecar
+          image: fluentd
+          ports:
+            - containerPort: 24224  # Fluentd listening port for forwarding logs
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/gm-access  # Shared volume for reading logs
+            - name: fluentd-config
+              mountPath: /fluentd/etc  # Fluentd configuration directory
+          command: ["fluentd", "-c", "/fluentd/etc/fluent.conf"]
+          resources:
+            limits:
+              memory: "200Mi"
+              cpu: "100m"
+
+      # Volumes for Shared Log Storage and ConfigMap
+      volumes:
+        - name: log-volume
+          emptyDir: {}  # Shared volume for logs between containers
+        - name: fluentd-config
+          configMap:
+            name: {{ .Values.services.gmAccess.volumes.fluentdConfigMap }}  # ConfigMap containing Fluentd configuration
