@@ -1,0 +1,34 @@
+
+If you don’t use helm package and have no .tgz files in the charts directory,
+you can still use helmfile with unarchived Helm charts. Here's how it works:
+
+Using Local Chart Directories
+helmfile and helm can work directly with unarchived charts, as long as the chart directory structure is valid and
+contains the necessary files (Chart.yaml, values.yaml, templates/, etc.).
+
+Pros of Using Unarchived Charts:
+ ----Easier Development:
+You can directly edit the chart files without needing to repackage after every change.
+ ----Version Control:
+It's straightforward to keep the chart directory under version control.
+
+
+Key Considerations:
+Valid Chart Structure:
+
+Ensure the local chart directory adheres to Helm's chart directory structure. It must include:
+Chart.yaml: Metadata about the chart.
+templates/: Kubernetes manifests and templates.
+Optionally values.yaml for default values.
+Dependencies:
+
+If your chart has dependencies, ensure they are managed using helm dependency update to populate
+the charts/ directory inside the chart folder.
+
+
+ ---Why .tgz Files Are Optional
+The .tgz packaged charts are primarily for:
+
+Reproducibility: Distributing a static version of your chart.
+Storage in Chart Repositories: Uploading to a chart repository like Helm Hub or an internal registry.
+If you're working in a local environment or with a GitOps-style repository, unarchived charts are sufficient.
