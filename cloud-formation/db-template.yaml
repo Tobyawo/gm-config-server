@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation Template to provision MySQL, PostgreSQL, SQS, Redis, and MongoDB.
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow Redis access
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          CidrIp: 0.0.0.0/0 # Adjust this for security
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Redis Subnet Group
+#      SubnetIds:
+#        - subnet-xxxxxxxx
+#        - subnet-yyyyyyyy
+
+  RedisCluster:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      ClusterName: RedisCluster
+      Engine: redis
+      CacheNodeType: cache.t3.micro
+      NumCacheNodes: 1
+      VpcSecurityGroupIds:
+        - !Ref RedisSecurityGroup
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+
+  MySQLDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: MySQLInstance
+      Engine: mysql
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      MasterUsername: admin
+      MasterUserPassword: MyStrongPassword
+      VPCSecurityGroups:
+        - !Ref RedisSecurityGroup
+      PubliclyAccessible: false
+
+  PostgreSQLDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: PostgreSQLInstance
+      Engine: postgres
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      MasterUsername: admin
+      MasterUserPassword: MyStrongPassword
+      VPCSecurityGroups:
+        - !Ref RedisSecurityGroup
+      PubliclyAccessible: false
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyQueue
+
+  MongoDBCluster:
+    Type: AWS::DocDB::DBCluster
+    Properties:
+      DBClusterIdentifier: MongoDBCluster
+      Engine: docdb
+      MasterUsername: admin
+      MasterUserPassword: MyStrongPassword
+      BackupRetentionPeriod: 7
+      StorageEncrypted: true
+      DBSubnetGroupName: !Ref MongoDBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref RedisSecurityGroup
+
+  MongoDBInstance:
+    Type: AWS::DocDB::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref MongoDBCluster
+      DBInstanceClass: db.r5.large
+
+  MongoDBSubnetGroup:
+    Type: AWS::DocDB::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: MongoDBSubnetGroup
+      DBSubnetGroupDescription: Subnet group for MongoDB
+#      SubnetIds:
+#        - subnet-xxxxxxxx
+#        - subnet-yyyyyyyy
+
+Outputs:
+  MySQLEndpoint:
+    Description: MySQL RDS Endpoint
+    Value: !GetAtt MySQLDatabase.Endpoint.Address
+
+  PostgreSQLEndpoint:
+    Description: PostgreSQL RDS Endpoint
+    Value: !GetAtt PostgreSQLDatabase.Endpoint.Address
+
+  RedisEndpoint:
+    Description: Redis Endpoint
+    Value: !GetAtt RedisCluster.RedisEndpoint.Address
+
+  SQSQueueURL:
+    Description: SQS Queue URL
+    Value: !Ref SQSQueue
+
+  MongoDBEndpoint:
+    Description: MongoDB Endpoint
+    Value: !GetAtt MongoDBCluster.Endpoint
+
+
+
+#  aws cloudformation deploy --stack-name database-stack --template-file db-template.yaml --capabilities CAPABILITY_NAMED_IAM
+#
