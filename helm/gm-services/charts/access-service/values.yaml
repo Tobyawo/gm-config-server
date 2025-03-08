@@ -18,6 +18,9 @@ services:
     volumes:
       logPath: /var/log/gm-access
       fluentdConfigMap: fluentd-gm-access-config
+    environment:
+      userDetailsUrl: http://gm-user-service.gm-services.svc.cluster.local
+
 
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/

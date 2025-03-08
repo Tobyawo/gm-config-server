@@ -23,6 +23,14 @@ spec:
           volumeMounts:
             - name: log-volume
               mountPath: /var/log/gm-access  # Path where logs are written by the application
+          env:
+            - name: user-details-url
+              value: {{ .Values.services.gmAccess.environment.userDetailsUrl}}
+            - name: spring.cloud.config.uri
+              value: "http://config-server:8888/config-server"
+            - name: spring.config.import
+              value: "optional:configserver:http://config-server:8888/config-server"
+
 
         # Fluentd Sidecar Container
         - name: fluentd-sidecar

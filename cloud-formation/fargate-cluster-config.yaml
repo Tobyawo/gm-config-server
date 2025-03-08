@@ -1,0 +1,28 @@
+
+# 1. Create the Amazon EKS cluster:
+#  eksctl create cluster  --name gm-services-cluster   --region us-east-1   --fargate
+
+#2. create fargate profile
+#  eksctl create fargateprofile --cluster gm-services-cluster --namespace gm-services --name gm-services
+#
+
+#3. Delete and re-create any existing Pods so that they’re scheduled on Fargate. For example, the following command triggers a rollout of the coredns deployment
+#kubectl rollout restart -n kube-system deployment coredns
+
+#4. create namespace
+#kubectl create namespace gm-services
+
+#5 Helmfile apply
+
+#6 kubectl get all -n gm-services
+
+#check cluster status
+#  aws eks describe-cluster --name gm-services-cluster --region us-east-1 --query cluster.status
+
+#Verify Fargate profile:
+#  eksctl get fargateprofile --cluster gm-services-cluster
+
+#Check worker nodes (should show Fargate instead of EC2 nodes):
+#  kubectl get nodes
+
+

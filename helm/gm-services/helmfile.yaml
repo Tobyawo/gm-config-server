@@ -1,17 +1,21 @@
 releases:
   - name: access-service
+    namespace: gm-services
     chart: ./charts/access-service
     values:
       - ./charts/access-service/values.yaml
   - name: user-service
     chart: ./charts/user-service
+    namespace: gm-services
     values:
       - ./charts/user-service/values.yaml
   - name: config-server
     chart: ./charts/config-server
+    namespace: gm-services
     values:
       - ./charts/config-server/values.yaml
-  - name: user-service-postgres
-    chart: ./charts/user-service-postgres
-    values:
-      - ./charts/user-service-postgres/values.yaml
+#  - name: user-service-postgres
+#    chart: ./charts/user-service-postgres
+#    namespace: gm-services
+#    values:
+#      - ./charts/user-service-postgres/values.yaml

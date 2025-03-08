@@ -15,32 +15,53 @@ spec:
         app: gm-user-service
     spec:
       containers:
+        # Main Application Container
         - name: gm-user
-          image: tobyawo/gm-user-service
+          image: {{ .Values.services.gmUser.image }}
           ports:
             - containerPort: 8087
           volumeMounts:
             - name: log-volume
               mountPath: /var/log/gm-user  # Adjust the log path as needed
+          env:
+            # Environment Variables for gm-user-service
+            - name: spring.datasource.url
+              value: {{ .Values.services.gmUser.environment.springDatasourceUrl }}
+            - name: spring.datasource.username
+              value: {{ .Values.services.gmUser.environment.springDatasourceUsername }}
+            - name: spring.datasource.password
+              value: {{ .Values.services.gmUser.environment.springDatasourcePassword }}
+            - name: jwt-secret
+              value: {{ .Values.services.gmUser.environment.jwtSecret }}
+            - name: spring.jpa.hibernate.ddl-auto
+              value: {{ .Values.services.gmUser.environment.springJpaHibernateDdlAuto }}
+            - name: spring.jpa.show-sql
+              value: {{ .Values.services.gmUser.environment.springJpaShowSql | quote }}
+            - name: spring.jpa.properties.hibernate.format_sql
+              value: {{ .Values.services.gmUser.environment.springJpaPropertiesHibernateFormatSql | quote }}
+            - name: spring.jpa.properties.hibernate.dialect
+              value: {{ .Values.services.gmUser.environment.springJpaPropertiesHibernateDialect }}
 
+        # Fluentd Sidecar Container for gm-user service logs
         - name: fluentd-user
-          image: fluentd
+          image: {{ .Values.services.gmUser.fluentd.image }}
           ports:
-            - containerPort: 24225
+            - containerPort: 24225  # Fluentd listening port for forwarding logs
           volumeMounts:
             - name: log-volume
-              mountPath: /var/log/gm-user
+              mountPath: /var/log/gm-user  # Shared volume for reading logs
             - name: fluentd-gm-user-config
-              mountPath: /fluentd/etc
+              mountPath: /fluentd/etc  # Fluentd configuration directory
+          command: ["fluentd", "-c", "/fluentd/etc/fluent.conf"]
           resources:
             limits:
               memory: "200Mi"
               cpu: "100m"
-          command: ["fluentd", "-c", "/fluentd/etc/fluent.conf"]
 
+      # Volumes for Shared Log Storage and ConfigMap
       volumes:
         - name: log-volume
-          emptyDir: {}
+          emptyDir: {}  # Shared volume for logs between containers
         - name: fluentd-gm-user-config
           configMap:
-            name: fluentd-gm-user-config
+            name: {{ .Values.services.gmUser.volumes.fluentdConfigMap }}  # ConfigMap containing Fluentd configuration
